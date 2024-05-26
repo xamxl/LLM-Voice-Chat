@@ -1,0 +1,156 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LLM Voice Chat</title>
+    <link rel="icon" href="https://cdn.glitch.global/16acbefb-ed22-47c8-9d47-37917abfc18e/img.png?v=1716757939485">
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <style>
+      .navbar-toggler {
+        border: none;
+      }
+
+      h1 {
+        margin-bottom: 0.4em;
+      }
+
+      .styled-div-2 {
+        padding: 1em 1em;
+        border: 0.05em solid grey;
+        border-radius: 1em;
+        margin-bottom: 1em;
+      }
+
+      .flex-display {
+        display: flex;
+      }
+
+      #stopButton {
+        margin-left: 1em;
+        display: none;
+      }
+
+      p[name="speakingText"] {
+        color: lightgray;
+        margin-top: 0.5em;
+        margin-bottom: 0;
+      }
+
+      label {
+        margin-bottom: 0;
+      }
+
+      .loader {
+        background-color: rgb(202, 145, 53);
+        color: white;
+      }
+    </style>
+  </head>
+
+  <script>
+    webLLMGlobal = {};
+  </script>
+
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">LLM Voice Chat</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item dropdown">
+            <a
+              name="lanText"
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="navbarDropdown"
+              role="button"
+              data-toggle="dropdown"
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              Change Language
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" id="english-link" href="#">English</a>
+              <a class="dropdown-item" id="spanish-link" href="#">Spanish</a>
+              <a class="dropdown-item" id="french-link" href="#">French</a>
+              <a class="dropdown-item" id="german-link" href="#">German</a>
+              <a class="dropdown-item" id="dutch-link" href="#">Dutch</a>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container mt-5">
+      <h1>Start Your Conversation Now</h1>
+      <div class="styled-div-2 loader">
+        <label id="init-label"></label>
+      </div>
+      <div class="styled-div-2">
+        <div class="flex-display">
+          <button disabled="true" class="btn btn-primary" id="startButton">
+            Record
+          </button>
+          <button class="btn btn-danger" id="stopButton">Stop</button>
+        </div>
+        <p name="speakingText">What you say will appear here ...</p>
+      </div>
+    </div>
+
+    <!-- Scripts will be loaded dynamically -->
+    <script>
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src;
+          script.onload = () => resolve(script);
+          script.onerror = () =>
+            reject(new Error(`Failed to load script: ${src}`));
+          document.head.appendChild(script);
+        });
+      }
+
+      (async () => {
+        try {
+          await loadScript("https://code.jquery.com/jquery-3.5.1.slim.min.js");
+          await loadScript(
+            "https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"
+          );
+          await loadScript(
+            "https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+          );
+
+          // Update dropdown links after scripts are loaded
+          document.getElementById("english-link").href = "get_started.html";
+          document.getElementById("spanish-link").href =
+            "get_started.html?lan=es";
+          document.getElementById("french-link").href =
+            "get_started.html?lan=fr";
+          document.getElementById("german-link").href =
+            "get_started.html?lan=de";
+          document.getElementById("dutch-link").href =
+            "get_started.html?lan=nl";
+        } catch (error) {
+          console.error(error);
+        }
+      })();
+    </script>
+    <!-- <script type="module" src="./get_started.ts"></script> -->
+    <script type="module" src="./new_start.ts"></script>
+  </body>
+</html>
