@@ -6,8 +6,9 @@
     "node": ">=14.x"
   },
   "scripts": {
-    "start": "cp gh-config.js app-config.js && parcel get_started.html --port 3000",
-    "build": "cp gh-config.js app-config.js && parcel build get_started.html --dist-dir lib --no-content-hash"
+    "start": "parcel src/index.html --port 3000",
+    "build": "parcel src/build index.html --dist-dir lib --no-content-hash",
+    "start-server": "node src/server.js"
   },
   "devDependencies": {
     "buffer": "^5.7.1",
@@ -18,6 +19,11 @@
     "url": "^0.11.3"
   },
   "dependencies": {
-    "@mlc-ai/web-llm": "^0.2.38"
+    "@mlc-ai/web-llm": "^0.2.38",
+    "@xenova/transformers": "^2.6.0",
+    "express": "^4.17.1",
+    "nodemailer": "^6.4.11",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5"
   }
 }

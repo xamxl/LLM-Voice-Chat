@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload and Parse Chunks</title>
+    <link rel="icon" href="https://cdn.glitch.global/16acbefb-ed22-47c8-9d47-37917abfc18e/img.png?v=1716757939485">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>.navbar-toggler {
+  border: none;
+}
+
+h1 {
+  margin-bottom: .4em;
+}
+
+.styled-div-2 {
+  border: .05em solid gray;
+  border-radius: 1em;
+  margin-bottom: 1em;
+  padding: 1em;
+}
+
+.flex-display {
+  display: flex;
+}
+
+#playAllButton {
+  margin-left: 1em;
+  display: inline-block;
+}
+
+p[name="speakingText"] {
+  color: #d3d3d3;
+  margin-top: .5em;
+  margin-bottom: 0;
+}
+</style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">LLM Voice Chat</a>
+      <a href="/index.html">Chat Now</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </nav>
+
+    <div class="container mt-5">
+      <h1>Listen To A Recording (llmvc file)</h1>
+      <div class="styled-div-2">
+        <div class="flex-display">
+          <input type="file" id="fileInput" accept=".llmvc" class="btn btn-secondary">
+          <button class="btn btn-primary" id="playAllButton" disabled="">Play All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts will be loaded dynamically -->
+    <script>function loadScript(src) {
+    return new Promise((resolve, reject)=>{
+        const script = document.createElement("script");
+        script.src = src;
+        script.onload = ()=>resolve(script);
+        script.onerror = ()=>reject(new Error(`Failed to load script: ${src}`));
+        document.head.appendChild(script);
+    });
+}
+(async ()=>{
+    try {
+        await loadScript("https://code.jquery.com/jquery-3.5.1.slim.min.js");
+        await loadScript("https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js");
+        await loadScript("https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js");
+    } catch (error) {
+        console.error(error);
+    }
+})();
+
+</script>
+
+    <script>const fileInput = document.getElementById("fileInput");
+const playAllButton = document.getElementById("playAllButton");
+const outputDiv = document.getElementsByName("speakingText")[0];
+let chunks = [];
+let language = "en";
+let voicesReady = false;
+fileInput.addEventListener("change", (event)=>{
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = async (e)=>{
+            const result = JSON.parse(e.target.result);
+            chunks = await Promise.all(result.slice(0, -1).map(async (chunk)=>{
+                if (chunk.type === "audio") {
+                    const audioBlob = await fetch(`data:audio/ogg; codecs=opus;base64,${chunk.data}`).then((res)=>res.blob());
+                    return {
+                        type: "audio",
+                        data: audioBlob
+                    };
+                } else return chunk;
+            }));
+            language = result[result.length - 1].data; // The last element
+            playAllButton.disabled = false;
+        };
+        reader.readAsText(file);
+    }
+});
+playAllButton.addEventListener("click", ()=>{
+    if (!voicesReady) loadVoices().then(()=>{
+        voicesReady = true;
+        playChunks(0);
+    });
+    else playChunks(0);
+});
+function loadVoices() {
+    return new Promise((resolve)=>{
+        const synth = window.speechSynthesis;
+        let id;
+        id = setInterval(()=>{
+            if (synth.getVoices().length !== 0) {
+                clearInterval(id);
+                resolve();
+            }
+        }, 10);
+    });
+}
+function playChunks(index) {
+    if (index >= chunks.length) return;
+    const currentChunk = chunks[index];
+    if (currentChunk.type === "audio") playAudio(currentChunk.data, ()=>playChunks(index + 1));
+    else if (currentChunk.type === "text") speakText(currentChunk.data, ()=>playChunks(index + 1));
+}
+function playAudio(data, callback) {
+    const audioURL = URL.createObjectURL(data);
+    const audio = new Audio(audioURL);
+    audio.onended = callback;
+    audio.play();
+}
+function speakText(text, callback) {
+    const synth = window.speechSynthesis;
+    const utterThis = new SpeechSynthesisUtterance(text);
+    let voiceToUse;
+    switch(language){
+        case "es":
+            voiceToUse = "Google espa\xf1ol";
+            break;
+        case "fr":
+            voiceToUse = "Google fran\xe7ais";
+            break;
+        case "de":
+            voiceToUse = "Google Deutsch";
+            break;
+        case "nl":
+            voiceToUse = "Google Nederlands";
+            break;
+        default:
+            voiceToUse = "Google US English";
+    }
+    const voices = synth.getVoices();
+    for (const voice of voices)if (voice.name === voiceToUse) {
+        utterThis.voice = voice;
+        break;
+    }
+    utterThis.onend = callback;
+    synth.speak(utterThis);
+}
+// Preload voices
+loadVoices().then(()=>{
+    voicesReady = true;
+});
+
+</script>
+<script src="/listen.501444b3.js"></script></body>
+</html>
