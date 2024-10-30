@@ -231,6 +231,8 @@ async function asyncGenerate(input) {
                 }
             }
             
+            console.log(utterThis);
+            utterThis.lang = utterThis.voice.lang;
             console.log("speaking!!!");
             synth.speak(utterThis);
             console.log(utterThis);
@@ -243,6 +245,9 @@ async function asyncGenerate(input) {
                 recognition.stop();
                 console.log("starting recognition fjsldkfs");
                 recognition.start();
+            });
+            utterThis.addEventListener('start', () => {
+                console.log("I'M SPEAKING NOW!!!");
             });
         }
       }
