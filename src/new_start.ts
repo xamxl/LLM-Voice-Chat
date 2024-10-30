@@ -1,7 +1,7 @@
 import * as webllm from "@mlc-ai/web-llm";
 
 import { prebuiltAppConfig } from "@mlc-ai/web-llm";
-import { send } from "process";
+//import { send } from "process";
 
 const appConfig = {
     "model_list": prebuiltAppConfig.model_list,
@@ -10,20 +10,20 @@ const appConfig = {
 
 const language = getLanguageFromCurrentUrl();
 let stopGenerating = false;
-let errorRec;
+//let errorRec;
 
 //START
-const recognition1 = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)();;
-recognition1.lang = language + '-US';
+//const recognition1 = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)();;
+//recognition1.lang = language + '-US';
 
 // Continuous listening
-recognition1.continuous = true;
-recognition1.interimResults = true;
+//recognition1.continuous = true;
+//recognition1.interimResults = true;
 
 // Variable to track if user has started speaking
-let userSpeaking = false;
+//let userSpeaking = false;
 
-recognition1.onstart = () => {
+/*recognition1.onstart = () => {
     console.log('Speech recognition started');
     startButton.textContent = 'Listening (Stop speaking to send)';
 };
@@ -57,13 +57,13 @@ recognition1.onend = () => {
     if (errorRec == "no-speech") {
         recognition1.start();
     }
-};
+};*/
 
 // Handle errors
-recognition1.onerror = (event) => {
+/*recognition1.onerror = (event) => {
     console.error("Speech recognition error:", event.error);
     errorRec = event.error;
-};
+};*/
 //STOP
 
 let config: webllm.AppConfig = appConfig;
@@ -79,6 +79,8 @@ let utterThis;
 
 let generating = false;
 let toRead = "";
+
+let stopped = false;
 
 function extractFirstSentence(text) {
     const sentenceEndings = /[.!?]/;
@@ -164,10 +166,10 @@ async function asyncInitChat() {
 
 async function asyncGenerate(input) {
     stopGenerating = false;
-    try {
+    /*try {
         // UNCOMMENT TO CONTINUE DEVELOPMENT OF INTERRUPTING
         //recognition1.start();
-    } catch (err) {}
+    } catch (err) {}*/
     generating = true;
     toRead = "";
     await asyncInitChat();
@@ -229,16 +231,17 @@ async function asyncGenerate(input) {
                 }
             }
             
+            console.log("speaking!!!");
             synth.speak(utterThis);
+            console.log(utterThis);
         }
-
 
         if (generating && (curDelta == "" || curDelta == undefined)) {
             generating = false;
             utterThis.addEventListener('end', () => {
-
                 startButton.textContent = 'Listening (Stop speaking to send)';
                 recognition.stop();
+                console.log("starting recognition fjsldkfs");
                 recognition.start();
             });
         }
@@ -278,6 +281,7 @@ const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognit
 recognition.lang = language + '-US';
 
 stopButton.addEventListener('click', () => {
+    stopped = true;
     cancel = true;
     recognition.stop();
     startButton.textContent = 'Record';
@@ -289,7 +293,7 @@ stopButton.addEventListener('click', () => {
 });
 
 recognition.onstart = () => {
-    recognition1.stop();
+    //recognition1.stop();
     cancel = false;
     startButton.textContent = 'Listening (Stop speaking to send)';
     startButton.disabled = false;
@@ -446,6 +450,10 @@ recognition.onresult = (event) => {
 recognition.onend = () => {};
 
 startButton.addEventListener('click', () => {
+    if (stopped) {
+        chunks = [];
+    }
+    stopped = false;
     recognition.start();
 });
 

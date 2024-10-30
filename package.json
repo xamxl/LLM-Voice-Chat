@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "parcel src/index.html --port 3000",
-    "build": "parcel src/build index.html --dist-dir lib --no-content-hash",
+    "build": "parcel build src/index.html --dist-dir dist --public-url ./",
     "start-server": "node src/server.js"
   },
   "devDependencies": {
